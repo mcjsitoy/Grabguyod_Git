@@ -13,6 +13,8 @@ public class addRequest {
     String driver_number;
     double lat;
     double lon;
+    double dist;
+    String streetname;
 
     public addRequest(){
 
@@ -69,6 +71,11 @@ public class addRequest {
         this.lon = lon;
     }
 
+    public addRequest(double dist, String streetname) {
+        this.dist = dist;
+        this.streetname = streetname;
+    }
+
     public String getRequest_id() {
         return request_id;
     }
@@ -115,5 +122,13 @@ public class addRequest {
 
     public Double getLon() {
         return lon;
+    }
+
+    public double getDist() {
+        return dist;
+    }
+
+    public String getStreetname() {
+        return streetname;
     }
 }

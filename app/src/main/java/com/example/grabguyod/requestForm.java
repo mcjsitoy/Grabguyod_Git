@@ -150,6 +150,8 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
         lt_driverfound.setVisibility(View.INVISIBLE);
         lt_currentdriver.setVisibility(View.INVISIBLE);
 
+
+        CalculateNearestPoint();
         getName();
         availableDriverCount();
         getUserLocation();
@@ -157,8 +159,42 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
             @Override
             public void onClick(View view) {/*
                 addRequest();*/
-                CalculateNearestPoint();
+               /* CalculateNearestPoint();*/
+
+                for (int y = 0; y < count; y++) {
+
+
+                    double earthRadius = 6371 ; // in miles, change to 6371 for kilometer output
+
+                    double dLat = Math.toRadians(latlist.get(y)-lt);
+                    double dLng = Math.toRadians(lnglist.get(y)-lg);
+
+                    double sindLat = Math.sin(dLat / 2);
+                    double sindLng = Math.sin(dLng / 2);
+
+                    double a = Math.pow(sindLat, 2) + Math.pow(sindLng, 2)
+                            * Math.cos(Math.toRadians(lt)) * Math.cos(Math.toRadians(latlist.get(y)));
+
+                    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+                    double dist = earthRadius * c;
+
+                    distlist.add(dist);
+                }
+
+
+
+                for (int y = 0; y < count; y++){
+
+                    queryRequest =  FirebaseDatabase.getInstance().getReference("hello");
+
+                    queryRequest.child(streetlist.get(y)).setValue(distlist.get(y));
+
+                }
+
             }
+
+
         });
 
         bt_cancel.setOnClickListener(new View.OnClickListener() {
@@ -685,73 +721,36 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
         });
     }
 
-    public void CalculateNearestPoint(){
-        ss =  FirebaseDatabase.getInstance().getReference("Streetname");
+    public void CalculateNearestPoint() {
+        ss = FirebaseDatabase.getInstance().getReference("Streetname");
 
-            //get The REQUEST KEY OR ID
+        //get The REQUEST KEY OR ID
         ss.orderByChild("g").addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    streetlist.clear();
-                    distlist.clear();
-                    latlist.clear();
-                    lnglist.clear();
-                    for (DataSnapshot areaSnap: dataSnapshot.getChildren()) {
-                        lat = dataSnapshot.getKey();
-                        streetlist.add(lat);
-                        Double tplt = areaSnap.child("l").child("0").getValue(Double.class);
-                        latlist.add(tplt);
-                        Double tplg = areaSnap.child("l").child("1").getValue(Double.class);
-                        lnglist.add(tplg);
-                        count = streetlist.size();
-                    }
-
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                streetlist.clear();
+                distlist.clear();
+                latlist.clear();
+                lnglist.clear();
+                for (DataSnapshot areaSnap : dataSnapshot.getChildren()) {
+                    lat = areaSnap.getKey();
+                    streetlist.add(lat);
+                    Double tplt = areaSnap.child("l").child("0").getValue(Double.class);
+                    latlist.add(tplt);
+                    Double tplg = areaSnap.child("l").child("1").getValue(Double.class);
+                    lnglist.add(tplg);
+                    count = streetlist.size();
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
 
-                }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            });
+            }
 
-
-
-        DatabaseReference sa =  FirebaseDatabase.getInstance().getReference("hello");
-
-
-        for (int y = 0; y < count; y++) {
-
-
-            double earthRadius = 6371 ; // in miles, change to 6371 for kilometer output
-
-            double dLat = Math.toRadians(latlist.get(y)-lt);
-            double dLng = Math.toRadians(lnglist.get(y)-lg);
-
-            double sindLat = Math.sin(dLat / 2);
-            double sindLng = Math.sin(dLng / 2);
-
-            double a = Math.pow(sindLat, 2) + Math.pow(sindLng, 2)
-                    * Math.cos(Math.toRadians(lt)) * Math.cos(Math.toRadians(latlist.get(y)));
-
-            double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-
-            double dist = earthRadius * c;
-
-            distlist.add(dist);
-        }
-
-
-
-        for (int y = 0; y < count; y++){
-
-            queryRequest =  FirebaseDatabase.getInstance().getReference("hello");
-
-            queryRequest.setValue(distlist.get(y));
-
-        }
-
-        }
+        });
+    }
 
     }
 
