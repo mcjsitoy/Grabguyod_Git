@@ -2,13 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.grabguyod">
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
-    <uses-permission android:name="android.permission.CAMERA"/>
-
-
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.perrmission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
 
     <application
         android:allowBackup="true"
@@ -17,20 +18,60 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".after"/>
-        <activity android:name=".riderlogin" />
-        <activity android:name=".driverlogin" />
-        <activity android:name=".Main3Activity">
+        <activity android:name=".list_currPass"></activity>
+        <activity
+            android:name=".usertype_Select"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".driver_requestList"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".driver_editProfile"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".driver_driveMode"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".driver_landingpage"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".list_layout"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".requestForm"
+            android:screenOrientation="portrait" />
+
+        <receiver
+            android:name=".myReceiverSMS"
+            android:enabled="true"
+            android:exported="true"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+
+        <activity android:name=".SMSgateway" />
+        <activity
+            android:name=".riderlogin"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".user_login"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Main3Activity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".map" />
-        <activity android:name=".Main2Activity" />
-        <activity android:name=".fbase" />
-        <activity android:name=".MainActivity"></activity>
+        <activity
+            android:name=".map"
+            android:screenOrientation="portrait" />
+        <activity android:name=".ridermap"
+                    android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

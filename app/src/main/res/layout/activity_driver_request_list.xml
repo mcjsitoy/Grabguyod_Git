@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:mapbox="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".driver_requestList">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/button_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:text="Back" />
+
+        <TextView
+            android:id="@+id/textView17"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:text="List of Request"
+
+            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+        <com.mapbox.mapboxsdk.maps.MapView
+            android:layout_margin="15dp"
+            android:id="@+id/mapView3"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            mapbox:mapbox_cameraTargetLat="7.163179"
+            mapbox:mapbox_cameraTargetLng="125.652081"
+            mapbox:mapbox_cameraZoom="14.7">
+
+    </com.mapbox.mapboxsdk.maps.MapView>
+
+        <ListView
+            android:id="@+id/listview_driverRequestList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="15dp" >
+
+        </ListView>
+    </LinearLayout>
+
+</RelativeLayout>

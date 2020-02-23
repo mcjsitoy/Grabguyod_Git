@@ -5,19 +5,28 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Main3Activity"
+    android:gravity="center"
     android:orientation="vertical">
 
 
     <Button
+        android:id="@+id/driver"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text ="I'm a Driver"
-        android:id="@+id/driver"/>
+        android:text="Login" />
+
+    <Button
+        android:id="@+id/rider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Register" />
+
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text ="I'm a Rider"
-        android:id="@+id/rider"/>
+        android:text ="Gateway"
+        android:id="@+id/gateway"/>
+
 
 
 </LinearLayout>

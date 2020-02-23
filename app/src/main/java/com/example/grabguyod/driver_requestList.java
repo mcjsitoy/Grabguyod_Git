@@ -1,5 +1,9 @@
 package com.example.grabguyod;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentActivity;
+
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
@@ -10,10 +14,8 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ListView;
 import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentActivity;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -44,9 +46,7 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
-import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.mapboxsdk.style.layers.FillLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 
@@ -57,8 +57,12 @@ import java.util.List;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillColor;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillOpacity;
 
+public class driver_requestList extends AppCompatActivity implements OnMapReadyCallback, PermissionsListener {
 
-public class map extends FragmentActivity implements OnMapReadyCallback, PermissionsListener{
+    DatabaseReference database_requestForm;
+    ListView listViewRequest;
+    List<addRequest> addRequestList;
+    Button bt_back;
     private static final LatLng BOUND_CORNER_NW = new LatLng(7.165823, 125.646832);
     private static final LatLng BOUND_CORNER_SE = new LatLng(7.161096, 125.657170);
     private static final LatLngBounds RESTRICTED_BOUNDS_AREA = new LatLngBounds.Builder()
@@ -77,23 +81,13 @@ public class map extends FragmentActivity implements OnMapReadyCallback, Permiss
     private LocationEngine locationengine;
     private long DEFAULT_INTERVAL_IN_MILLISECONDS = 1000L;
     private long DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 5;
-    private mapLocationCallback callback = new mapLocationCallback(this);
+    private driver_requestList.driver_requestListLocationCallback callback = new driver_requestListLocationCallback(this);
     private Location mLastLocation;
     private Location locs;
-    public  Button dmlogout;
+    public Button dmlogout;
     private FirebaseAuth user;
-    private  int circlerad = 2;
+    private int circlerad = 2;
     private boolean driverfound = false;
-    private SymbolManager symbolManager;
-    private Symbol symbol;
-    final List<String> keyNamelist = new ArrayList<String>();
-    final List<Double> latlist = new ArrayList<Double>();
-    final List<Double> lnglist = new ArrayList<Double>();
-    private static final String DOT = "dot-10";
-    List<addRequest> addRequestList;
-
-
-
 
 
 
@@ -103,55 +97,40 @@ public class map extends FragmentActivity implements OnMapReadyCallback, Permiss
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Mapbox.getInstance(this, getString(R.string.access_token));
-        setContentView(R.layout.activity_map);
-        mapView = findViewById(R.id.mapView);
+        setContentView(R.layout.activity_driver_request_list);
+        mapView = findViewById(R.id.mapView3);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
         mauth = FirebaseAuth.getInstance();
 
-        //LOGOUT ??? //
+        database_requestForm = FirebaseDatabase.getInstance().getReference("requestForm");
+        addRequestList = new ArrayList<>();
+        bt_back = findViewById(R.id.button_back);
 
-       /* dmlogout = (Button) findViewById(R.id.logout);
-        dmlogout.setOnClickListener(new View.OnClickListener() {
+        bt_back.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
-                if(user != null){
-                    Intent intent = new Intent(map.this, Main3Activity.class);
-                    startActivity(intent);
-                    finish();
-                    return;
-                }
-
-
+            public void onClick(View v) {
+                Intent intent = new Intent(driver_requestList.this, driver_driveMode.class);
+                startActivity(intent);
+                finish();
+                return;
             }
         });
-*/
-
-
-
-
-
-
-        //temporary//
-
-
-        //temporary dont know where to put this//
 
 
     }
+
     @Override
     public void onMapReady(@NonNull final MapboxMap mapbox) {
         this.mapbox = mapbox;
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-        findViewById(R.id.floatingActionButton).setOnClickListener(new View.OnClickListener() {
+      /*  findViewById(R.id.floatingActionButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(user != null) {
                     onDestroy();
-                    Intent intent = new Intent(map.this, Main3Activity.class);
+                    Intent intent = new Intent(driver_requestList.this, Main3Activity.class);
                     startActivity(intent);
                     FirebaseAuth.getInstance().signOut();
 
@@ -159,13 +138,7 @@ public class map extends FragmentActivity implements OnMapReadyCallback, Permiss
 
                 }
             }
-        });
-
-
-
-
-
-
+        });*/
 
 
         mapbox.setStyle(new Style.Builder().fromUri("mapbox://styles/mcjsitoy/ck08cyj3p125l1cp6x5dj7veq"),
@@ -181,7 +154,7 @@ public class map extends FragmentActivity implements OnMapReadyCallback, Permiss
 
                         showCrosshair();
                         initLocationEngine();
-                        getrider(style);
+                        getrider();
 
 
 
@@ -196,6 +169,7 @@ public class map extends FragmentActivity implements OnMapReadyCallback, Permiss
 
                 });
     }
+
 
     private void showBoundsArea(@NonNull Style loadedMapStyle) {
         outerPoints.add(Point.fromLngLat(RESTRICTED_BOUNDS_AREA.getNorthWest().getLongitude(),
@@ -219,16 +193,14 @@ public class map extends FragmentActivity implements OnMapReadyCallback, Permiss
         ));
     }
 
+
+
     private void showCrosshair() {
         View crosshair = new View(this);
         crosshair.setLayoutParams(new FrameLayout.LayoutParams(15, 15, Gravity.CENTER ));
         crosshair.setBackgroundColor(Color.GREEN );
         mapView.addView(crosshair);
     }
-
-
-
-
 
 
     private void enableLocationComponent(@NonNull Style loadedMapStyle){
@@ -253,6 +225,7 @@ public class map extends FragmentActivity implements OnMapReadyCallback, Permiss
 
 
     }
+
     @SuppressWarnings("MissingPermission")
     public void initLocationEngine(){
         locationengine = LocationEngineProvider.getBestLocationEngine(this);
@@ -268,8 +241,6 @@ public class map extends FragmentActivity implements OnMapReadyCallback, Permiss
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
-
-
 
     @Override
     public void onExplanationNeeded(List<String> permissionsToExplain) {
@@ -294,18 +265,18 @@ public class map extends FragmentActivity implements OnMapReadyCallback, Permiss
             finish();
         }
     }
-    private static  class mapLocationCallback
+    private static  class driver_requestListLocationCallback
             implements LocationEngineCallback<LocationEngineResult> {
 
-        private final WeakReference<map> activityWeakReference;
+        private final WeakReference<driver_requestList> activityWeakReference;
 
-        mapLocationCallback(map activity) {
+        driver_requestListLocationCallback(driver_requestList activity) {
             this.activityWeakReference = new WeakReference<>(activity);
         }
 
         public void onSuccess(LocationEngineResult result) {
 
-            map activity = activityWeakReference.get();
+            driver_requestList activity = activityWeakReference.get();
 
             if (activity != null) {
                 Location location = result.getLastLocation();
@@ -351,7 +322,7 @@ public class map extends FragmentActivity implements OnMapReadyCallback, Permiss
 
         public void onFailure(@NonNull Exception exception) {
             Log.d("LocationChangeActivity", exception.getLocalizedMessage());
-            map activity = activityWeakReference.get();
+            driver_requestList activity = activityWeakReference.get();
             if (activity != null) {
                 Toast.makeText(activity, exception.getLocalizedMessage(),
                         Toast.LENGTH_SHORT).show();
@@ -361,19 +332,44 @@ public class map extends FragmentActivity implements OnMapReadyCallback, Permiss
 
     }
 
-
-
-
-
-
-
     @SuppressWarnings("MissingPermmisions")
-    @Override
-    protected void onStart() {
+    /*@Override*/
+   /* protected void onStart() {
         super.onStart();
 
 
         mapView.onStart();
+
+
+    }*/
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mapView.onStart();
+
+
+        listViewRequest = (ListView) findViewById(R.id.listview_driverRequestList);
+
+        database_requestForm.orderByChild("request_Status").equalTo("Pending").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                addRequestList.clear();
+                for (DataSnapshot requestSnapshot : dataSnapshot.getChildren()) {
+                    addRequest addRequest = requestSnapshot.getValue(addRequest.class);
+                    addRequestList.add(addRequest);
+                }
+
+                list_layout adapter = new list_layout(driver_requestList.this, addRequestList);
+                listViewRequest.setAdapter(adapter);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @Override
@@ -461,43 +457,11 @@ public class map extends FragmentActivity implements OnMapReadyCallback, Permiss
 
     }
 
-    private void getrider(final Style style){
+    private void getrider(){
         DatabaseReference drivloc = FirebaseDatabase.getInstance().getReference("CustomerRequest");
         drivloc.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                dataSnapshot.getChildrenCount();
-
-                for (DataSnapshot areaSnapshot : dataSnapshot.getChildren()) {
-                    String keyName = areaSnapshot.getKey();
-                    keyNamelist.add(keyName);
-                    Double lat = areaSnapshot.child("l").child("0").getValue(Double.class);
-                    latlist.add(lat);
-                    Double lng = areaSnapshot.child("l").child("1").getValue(Double.class);
-                    lnglist.add(lng);
-
-
-
-                    symbolManager = new SymbolManager(mapView, mapbox, style);
-                    symbolManager.setIconAllowOverlap(true);
-                    symbolManager.setTextAllowOverlap(true);
-                    symbol = symbolManager.create(new SymbolOptions()
-                            .withLatLng(new LatLng(lat, lng))
-                            .withIconImage(DOT)
-                            .withIconColor("red")
-                            .withIconSize(2.0f)
-                            .withDraggable(true));
-
-
-
-
-
-
-
-                }
-
-
 
 
 
@@ -515,9 +479,6 @@ public class map extends FragmentActivity implements OnMapReadyCallback, Permiss
 
 
     }
-
-
-
 
 
 
