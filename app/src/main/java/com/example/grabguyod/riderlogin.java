@@ -46,7 +46,7 @@ public class riderlogin extends AppCompatActivity {
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 if(user!=null){
                     if (c_UserType == "riders") {
-                        Intent intent = new Intent(riderlogin.this, requestForm.class);
+                        Intent intent = new Intent(riderlogin.this, rider_landingpage.class);
                         startActivity(intent);
                         finish();
                     } else  {

@@ -83,7 +83,7 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
     String no_Riders, requestCode, status, safetycode, tempPhoneNumber,tempName, lat, lng, set,user_destination;
     Random random = new Random();
     EditText  et_noP, et_destination;
-    TextView tv_safeCode,tv_userName,tv_driverCount;
+    TextView tv_safeCode,tv_userName,tv_driverCount, tv_requestStatus;
     Button bt_submit, bt_logout, bt_cancel,bt_accept,bt_decline;
     double lt, lg;
     View lt_cancel, lt_driverfound, lt_currentdriver;
@@ -118,7 +118,6 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
     public static String locs;
     Double counterDist;
     String nearLoc;
-    Spinner s_dest;
     int counterPosition;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,15 +144,12 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
         lt_currentdriver = findViewById(R.id.layout_currentdriver);
         tv_safeCode = findViewById(R.id.textView_passengerCode);
         et_destination = findViewById(R.id.editText_Destination);
+        tv_requestStatus = findViewById(R.id.textView25);
         /*s_dest = findViewById(R.id.spinner2);*/
 
         user = FirebaseAuth.getInstance().getCurrentUser();
         uid = user.getUid();
         addRequestList = new ArrayList<>();
-
-        //USER INFORMATION
-        tv_driverCount = findViewById(R.id.textView_driverCount);
-        tv_userName = findViewById(R.id.textView_userName);
 
         //HIDE LAYOUT
         lt_cancel.setVisibility(View.INVISIBLE);
@@ -162,8 +158,6 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
 
 
         getStreets();
-        getName();
-        availableDriverCount();
         getUserLocation();
 
 
@@ -232,21 +226,7 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
         bt_logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public   void onClick(View v) {
-                onDestroy();
-                isloggingout = true;
-                FirebaseAuth.getInstance().signOut();
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
-                if (user == null ) {
-                    Toast.makeText(requestForm.this, "Logged Out", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(requestForm.this, "Not Logout", Toast.LENGTH_SHORT).show();
-                }
-
-                Intent intent = new Intent(requestForm.this, Main3Activity.class);
-                startActivity(intent);
-                finish();
-                return;
+                disconnect();
             }
         });
 
@@ -444,7 +424,6 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
 
 
                 //GETTING STREET NAME//
-
                 DatabaseReference dlocation = FirebaseDatabase.getInstance().getReference("Streetname");
                 GeoFire custfire = new GeoFire(dlocation);
                 GeoQuery geoQuery = custfire.queryAtLocation(new GeoLocation(location.getLatitude(), location.getLongitude()), radius);
@@ -573,14 +552,8 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(!isloggingout){
-            disconnect();
-        }
-
-        mapView.onDestroy();
-
-
     }
+
 
 
     public void getUserLocation(){
@@ -656,6 +629,7 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
 
                 }
             });
+
     }
 
     private void acceptDriver(){
@@ -683,6 +657,7 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
         if (status != null){
             lt_driverfound.setVisibility(View.VISIBLE);
             Toast.makeText(requestForm.this, "Driver Found", Toast.LENGTH_SHORT).show();
+            tv_requestStatus.setText("Driver Found!");
         }
 
     }
@@ -704,47 +679,6 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
         });
     }
 
-    private void getName(){
-        DatabaseReference getName = FirebaseDatabase.getInstance().getReference("users");
-
-        getName.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                tempName = dataSnapshot.child("riders").child(uid).child("tb_FullName").getValue(String.class);
-                tv_userName.setText(tempName.toString());
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    private void availableDriverCount(){
-        driverCount = FirebaseDatabase.getInstance().getReference().child("driveravailable");
-
-        driverCount.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()){/*
-                    Double status = dataSnapshot.child("T6EJWQMMgwPLsT6pMrt9MT70Mtn2").child("l").child("1").getValue(Double.class);
-                    String numberAsString = Double.toString(status);
-                    Toast.makeText(requestForm.this, numberAsString,Toast.LENGTH_SHORT).show();*/
-
-                    size = (int) dataSnapshot.getChildrenCount();
-                    tempCount = Integer.toString(size);
-                    tv_driverCount.setText(tempCount);
-
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
 
     public void getStreets() {
         ss = FirebaseDatabase.getInstance().getReference("Streetname");

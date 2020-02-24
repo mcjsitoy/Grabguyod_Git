@@ -151,7 +151,7 @@ public class user_login extends AppCompatActivity {
     }
 
     public void openRequestform(){
-        Intent intent = new Intent(user_login.this, requestForm.class);
+        Intent intent = new Intent(user_login.this, rider_landingpage.class);
         startActivity(intent);
         finish();
         return;
