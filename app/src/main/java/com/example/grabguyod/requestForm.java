@@ -57,6 +57,9 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.mapboxsdk.style.layers.FillLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 
@@ -93,7 +96,10 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
     final List<Double> latlist = new ArrayList<Double>();
     final List<Double> lnglist = new ArrayList<Double>();
     Boolean hasRequest = false;
-    int size, count;
+    int size, count, x;
+    Double destlat;
+    Double destlng;
+    Symbol symbol;
 
     private static final LatLng BOUND_CORNER_NW = new LatLng(7.165823, 125.646832);
     private static final LatLng BOUND_CORNER_SE = new LatLng(7.161096, 125.657170);
@@ -105,6 +111,9 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
     private final List<List<Point>> points = new ArrayList<>();
     private final List<Point> outerPoints = new ArrayList<>();
     private FirebaseAuth mauth;
+    private static final String DOT = "dot-10";
+    LatLng destpos;
+
 
 
     private MapView mapView;
@@ -232,8 +241,9 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
         bt_logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public   void onClick(View v) {
-                onDestroy();
                 isloggingout = true;
+                onDestroy();
+
                 FirebaseAuth.getInstance().signOut();
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -283,13 +293,10 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
 
                         mapbox.setMinZoomPreference(10);
                         showBoundsArea(style);
-                        //MARKER ADD//
-                        /*SymbolManager symbolManager = new SymbolManager(mapView, mapbox, style);
-                        symbolManager.setIconAllowOverlap(true);
-                        symbolManager.setIconIgnorePlacement(true);*/
-                        //MARKER ADD//
+
                         showCrosshair();
                         initLocationEngine();
+                        getdest(style);
 
                     }
 
@@ -776,6 +783,28 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
 
         });
     }
+     private void getdest(@NonNull final Style style){
+
+         mapbox.addOnMapClickListener(new MapboxMap.OnMapClickListener() {
+             SymbolManager symbolManager = new SymbolManager(mapView, mapbox, style);
+             @Override
+             public boolean onMapClick(@NonNull LatLng point) {
+
+
+                 if(symbol != null) {
+                     symbolManager.delete(symbol);
+                 }
+
+                     symbol = symbolManager.create(new SymbolOptions()
+                             .withLatLng(new LatLng(point))
+                             .withIconImage(DOT)
+                             .withIconSize(2.0f));
+
+
+                 return true;
+             }
+         });
+     }
 
 
 }
