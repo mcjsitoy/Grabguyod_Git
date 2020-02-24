@@ -21,15 +21,14 @@
         app:layout_constraintVertical_chainStyle="packed" />
 
     <LinearLayout
-        android:layout_width="350dp"
-        android:layout_height="600dp"
+        android:layout_width="343dp"
+        android:layout_height="634dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.491"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.786">
+        app:layout_constraintVertical_bias="0.969">
 
         <TextView
             android:id="@+id/textView6"
@@ -62,8 +61,8 @@
             android:layout_marginLeft="38dp"
             android:layout_marginEnd="38dp"
             android:layout_marginRight="38dp"
-            android:inputType="textPassword"
-            android:hint="Password" />
+            android:hint="Password"
+            android:inputType="textPassword" />
 
         <TextView
             android:id="@+id/textView8"
@@ -93,7 +92,8 @@
             android:id="@+id/radioUserType"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="38dp">
+            android:layout_marginLeft="38dp"
+            android:orientation="horizontal">
 
             <RadioButton
                 android:id="@+id/radioRider"
@@ -139,6 +139,26 @@
             android:visibility="invisible" />
 
         <TextView
+            android:id="@+id/textView_Driver"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Guyod License Plate"
+            android:visibility="invisible" />
+
+        <EditText
+            android:id="@+id/editText_licensePlate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="38dp"
+            android:layout_marginLeft="38dp"
+            android:layout_marginEnd="38dp"
+            android:layout_marginRight="38dp"
+            android:ems="10"
+            android:hint="License Plate Here"
+            android:inputType="textPersonName"
+            android:visibility="invisible" />
+
+        <TextView
             android:id="@+id/tv_Label_PhoneNumber"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -150,13 +170,13 @@
             android:id="@+id/tv_PhoneNumber"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:maxLength="11"
-            android:inputType="phone"
             android:layout_marginStart="38dp"
             android:layout_marginLeft="38dp"
             android:layout_marginEnd="38dp"
             android:layout_marginRight="38dp"
             android:hint="09** *** ****"
+            android:inputType="phone"
+            android:maxLength="11"
             android:visibility="invisible" />
 
         <Button

@@ -59,7 +59,7 @@ public class driver_landingpage extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String fname = dataSnapshot.child("drivers").child(uid).child("tb_FullName").getValue(String.class);
-                String tplate = dataSnapshot.child("drivers").child(uid).child("tb_PhoneNumber").getValue(String.class);
+                String tplate = dataSnapshot.child("drivers").child(uid).child("licensePlate").getValue(String.class);
                 String number = dataSnapshot.child("drivers").child(uid).child("tb_PhoneNumber").getValue(String.class);
                 String license = dataSnapshot.child("drivers").child(uid).child("tb_DriverLicense").getValue(String.class);
 

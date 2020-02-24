@@ -12,9 +12,11 @@ import android.os.PersistableBundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.geofire.GeoFire;
@@ -33,6 +35,7 @@ import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
+import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.Polygon;
 import com.mapbox.mapboxsdk.Mapbox;
@@ -46,7 +49,9 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.mapboxsdk.style.layers.FillLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 
@@ -56,6 +61,7 @@ import java.util.List;
 
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillColor;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillOpacity;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.symbolZOrder;
 
 public class driver_requestList extends AppCompatActivity implements OnMapReadyCallback, PermissionsListener {
 
@@ -88,10 +94,16 @@ public class driver_requestList extends AppCompatActivity implements OnMapReadyC
     private FirebaseAuth user;
     private int circlerad = 2;
     private boolean driverfound = false;
-
-
-
-
+    private SymbolManager symbolManager;
+    private Symbol symbols;
+    private FeatureCollection featurecollect;
+    final List<String> keyNamelist = new ArrayList<String>();
+    final List<Double> latlist = new ArrayList<Double>();
+    final List<Double> lnglist = new ArrayList<Double>();
+    private static final String DOT = "dot-10";
+    public TextView tv_lat,tv_long;
+    int counter = 0;
+    Button ty;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +114,8 @@ public class driver_requestList extends AppCompatActivity implements OnMapReadyC
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
         mauth = FirebaseAuth.getInstance();
+        ty = findViewById(R.id.button);
+        listViewRequest = (ListView) findViewById(R.id.listview_driverRequestList);
 
         database_requestForm = FirebaseDatabase.getInstance().getReference("requestForm");
         addRequestList = new ArrayList<>();
@@ -117,34 +131,25 @@ public class driver_requestList extends AppCompatActivity implements OnMapReadyC
             }
         });
 
+        ty.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                refresh();
+            }
+        });
 
-    }
+
+        }
 
     @Override
     public void onMapReady(@NonNull final MapboxMap mapbox) {
         this.mapbox = mapbox;
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
-      /*  findViewById(R.id.floatingActionButton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(user != null) {
-                    onDestroy();
-                    Intent intent = new Intent(driver_requestList.this, Main3Activity.class);
-                    startActivity(intent);
-                    FirebaseAuth.getInstance().signOut();
-
-                    finish();
-
-                }
-            }
-        });*/
-
-
         mapbox.setStyle(new Style.Builder().fromUri("mapbox://styles/mcjsitoy/ck08cyj3p125l1cp6x5dj7veq"),
                 new Style.OnStyleLoaded() {
                     @Override
                     public void onStyleLoaded(@NonNull Style style) {
+                        // The map has finished rendering
                         enableLocationComponent(style);
                         mapbox.setLatLngBoundsForCameraTarget(RESTRICTED_BOUNDS_AREA);
 
@@ -154,20 +159,15 @@ public class driver_requestList extends AppCompatActivity implements OnMapReadyC
 
                         showCrosshair();
                         initLocationEngine();
-                        getrider();
-
-
-
-
-
-
-
-
-
+                        symbolManager = new SymbolManager(mapView, mapbox, style);
+                        symbolManager.setIconAllowOverlap(true);
+                        symbolManager.setTextAllowOverlap(true);
+                        getrider(style);
 
                     }
 
                 });
+
     }
 
 
@@ -193,8 +193,6 @@ public class driver_requestList extends AppCompatActivity implements OnMapReadyC
         ));
     }
 
-
-
     private void showCrosshair() {
         View crosshair = new View(this);
         crosshair.setLayoutParams(new FrameLayout.LayoutParams(15, 15, Gravity.CENTER ));
@@ -204,8 +202,6 @@ public class driver_requestList extends AppCompatActivity implements OnMapReadyC
 
 
     private void enableLocationComponent(@NonNull Style loadedMapStyle){
-
-
 
         if(PermissionsManager.areLocationPermissionsGranted(this)){
             LocationComponent locationComponent = mapbox.getLocationComponent();
@@ -221,9 +217,6 @@ public class driver_requestList extends AppCompatActivity implements OnMapReadyC
             permissionsManager = new PermissionsManager(this);
             permissionsManager.requestLocationPermissions(this);
         }
-
-
-
     }
 
     @SuppressWarnings("MissingPermission")
@@ -255,16 +248,13 @@ public class driver_requestList extends AppCompatActivity implements OnMapReadyC
                 public void onStyleLoaded(@NonNull Style style) {
                     enableLocationComponent(style);
                 }
-
-
             });
-
-
         } else {
             Toast.makeText(this, R.string.user_location_permission_not_granted, Toast.LENGTH_LONG).show();
             finish();
         }
     }
+
     private static  class driver_requestListLocationCallback
             implements LocationEngineCallback<LocationEngineResult> {
 
@@ -287,14 +277,7 @@ public class driver_requestList extends AppCompatActivity implements OnMapReadyC
                            String.valueOf(result.getLastLocation().getLatitude()),
                            String.valueOf(result.getLastLocation().getLongitude())),
                            Toast.LENGTH_SHORT).show();*/
-
-
-
-
-
             }
-
-
 
             if (activity.mapbox != null && result.getLastLocation() != null){
                 Location location = result.getLastLocation();
@@ -306,18 +289,7 @@ public class driver_requestList extends AppCompatActivity implements OnMapReadyC
 
                 GeoFire geoFire = new GeoFire(ref);
                 geoFire.setLocation(userId, new GeoLocation(location.getLatitude(), location.getLongitude()));
-
-
-
-
-
             }
-
-
-
-
-
-
         }
 
         public void onFailure(@NonNull Exception exception) {
@@ -328,20 +300,9 @@ public class driver_requestList extends AppCompatActivity implements OnMapReadyC
                         Toast.LENGTH_SHORT).show();
             }
         }
-
-
     }
 
     @SuppressWarnings("MissingPermmisions")
-    /*@Override*/
-   /* protected void onStart() {
-        super.onStart();
-
-
-        mapView.onStart();
-
-
-    }*/
 
     @Override
     protected void onStart() {
@@ -349,7 +310,6 @@ public class driver_requestList extends AppCompatActivity implements OnMapReadyC
         mapView.onStart();
 
 
-        listViewRequest = (ListView) findViewById(R.id.listview_driverRequestList);
 
         database_requestForm.orderByChild("request_Status").equalTo("Pending").addValueEventListener(new ValueEventListener() {
             @Override
@@ -363,6 +323,9 @@ public class driver_requestList extends AppCompatActivity implements OnMapReadyC
 
                 list_layout adapter = new list_layout(driver_requestList.this, addRequestList);
                 listViewRequest.setAdapter(adapter);
+                openthis();
+                counter++;
+
             }
 
             @Override
@@ -388,10 +351,6 @@ public class driver_requestList extends AppCompatActivity implements OnMapReadyC
     @Override
     protected void onStop() {
         super.onStop();
-
-
-
-
         if(locationengine != null){
             locationengine.removeLocationUpdates(callback);
             String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -402,19 +361,7 @@ public class driver_requestList extends AppCompatActivity implements OnMapReadyC
 
 
         }
-
-
-
-
-
-
-
-
         mapView.onStop();
-
-
-
-
     }
 
     @Override
@@ -440,31 +387,41 @@ public class driver_requestList extends AppCompatActivity implements OnMapReadyC
             GeoFire geoFire = new GeoFire(ref);
             geoFire.removeLocation(userId);
         }
-
         mapView.onDestroy();
-
-
     }
 
     private void addMarker(@NonNull Style loadedMapStyle){
         SymbolManager symbolManager = new SymbolManager(mapView, mapbox, loadedMapStyle);
         symbolManager.setIconAllowOverlap(true);
         symbolManager.setIconIgnorePlacement(true);
-
-
-
-
-
     }
 
-    private void getrider(){
-        DatabaseReference drivloc = FirebaseDatabase.getInstance().getReference("CustomerRequest");
+    private void getrider(final Style style){
+        DatabaseReference drivloc = FirebaseDatabase.getInstance().getReference("requestForm");
         drivloc.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                dataSnapshot.getChildrenCount();
+                for (int z = 0; z < dataSnapshot.getChildrenCount(); z++) {
+                    for (DataSnapshot areaSnapshot : dataSnapshot.getChildren()) {
+                        String keyName = areaSnapshot.getKey();
+                        keyNamelist.add(keyName);
+                        Double lat = areaSnapshot.child("lat").getValue(Double.class);
+                        latlist.add(lat);
+                        Double lng = areaSnapshot.child("lon").getValue(Double.class);
+                        lnglist.add(lng);
 
-
-
+                        lat = latlist.get(z);
+                        lng = lnglist.get(z);
+                        SymbolManager symbolManager = new SymbolManager(mapView, mapbox, style);
+                        symbols = symbolManager.create(new SymbolOptions()
+                                .withLatLng(new LatLng(lat, lng))
+                                .withIconImage(DOT)
+                                .withIconColor("red")
+                                .withIconSize(2.0f)
+                                .withDraggable(true));
+                    }
+                }
             }
 
             @Override
@@ -472,16 +429,28 @@ public class driver_requestList extends AppCompatActivity implements OnMapReadyC
 
             }
         });
-
-
-
-
-
-
     }
 
+    //NOTIFICATION IF NEW REQUEST IS ADDED
+    public void openthis(){
+           /* modal_dialog exampleDialog = new modal_dialog();
+            exampleDialog.show(getSupportFragmentManager(), "example dialog");*/
+           if(counter != 0) {
+               Toast.makeText(this, "New Request", Toast.LENGTH_SHORT).show();
+           }
+    }
 
-
-
-
+    public void refresh(){
+        startActivity(getIntent());
+    }
 }
+
+/*@Override*/
+   /* protected void onStart() {
+        super.onStart();
+
+
+        mapView.onStart();
+
+
+    }*/

@@ -7,14 +7,16 @@ public class addRegister {
     String UserType;
     String DriverLicense;
     String PhoneNumber;
+    String licensePlate;
 
-    public addRegister(String Email, String Password, String FullName, String UserType, String DriverLicense, String PhoneNumber) {
+    public addRegister(String Email, String Password, String FullName, String UserType, String DriverLicense, String PhoneNumber, String licensePlate) {
         this.Email = Email;
         this.Password = Password;
         this.FullName = FullName;
         this.UserType = UserType;
         this.DriverLicense = DriverLicense;
         this.PhoneNumber = PhoneNumber;
+        this.licensePlate = licensePlate;
     }
 
     public addRegister(String Email, String Password, String FullName, String UserType) {
@@ -46,5 +48,9 @@ public class addRegister {
 
     public String getTb_PhoneNumber() {
         return PhoneNumber;
+    }
+
+    public String getLicensePlate() {
+            return licensePlate;
     }
 }

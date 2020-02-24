@@ -18,7 +18,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".list_currPass"></activity>
+        <activity android:name=".rider_landingpage"></activity>
+        <activity android:name=".list_street" />
+        <activity android:name=".list_currPass" />
         <activity
             android:name=".usertype_Select"
             android:screenOrientation="portrait" />
@@ -70,8 +72,9 @@
         <activity
             android:name=".map"
             android:screenOrientation="portrait" />
-        <activity android:name=".ridermap"
-                    android:screenOrientation="portrait"/>
+        <activity
+            android:name=".ridermap"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

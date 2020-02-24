@@ -1,6 +1,8 @@
 package com.example.grabguyod;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,9 +27,10 @@ public class list_layout extends ArrayAdapter<addRequest> {
     private Activity context;
     private List<addRequest> addRequestList;
     private String keyName, id_request,id_user,noP_user,offlineBroadcastStatus,status_request, timestamp,user_location, requestCode, uid;
-    private Double lat, lng;;
+    private Double lat, lng;
+    public static Double translat ,translng;
     FirebaseUser user;
-    DatabaseReference querythis;
+    DatabaseReference querythis, drivloc;
 
     public list_layout(Activity context, List<addRequest> addRequestList){
         super(context, R.layout.activity_list_layout, addRequestList);
@@ -42,6 +45,7 @@ public class list_layout extends ArrayAdapter<addRequest> {
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         querythis = FirebaseDatabase.getInstance().getReference("requestForm");
+        drivloc = FirebaseDatabase.getInstance().getReference("MarkerViewRequest");
         LayoutInflater inflater = context.getLayoutInflater();
 
         View listViewItem = inflater.inflate(R.layout.activity_list_layout,null,true);
@@ -54,7 +58,7 @@ public class list_layout extends ArrayAdapter<addRequest> {
         TextView tv_Location = listViewItem.findViewById(R.id.textView_location);
         TextView tv_NoRiders = listViewItem.findViewById(R.id.textView_noRiders);
         Button bt_add = listViewItem.findViewById(R.id.button_picked);
-        Button bt_map = listViewItem.findViewById(R.id.button_Map);
+        Button bt_map = listViewItem.findViewById(R.id.button_map);
 
 
         final addRequest addRequest = addRequestList.get(position);
@@ -87,6 +91,17 @@ public class list_layout extends ArrayAdapter<addRequest> {
             }
         });
 
+        bt_map.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                translat = lat;
+                translng = lng;
+
+                /*addRequest adR = new addRequest(id_user, lat,lng);
+                drivloc.child(id_request).setValue(adR);*/
+            }
+        });
+
 
 
 
@@ -96,4 +111,5 @@ public class list_layout extends ArrayAdapter<addRequest> {
 
         return listViewItem;
     }
+
 }

@@ -13,8 +13,7 @@ public class addRequest {
     String driver_number;
     double lat;
     double lon;
-    double dist;
-    String streetname;
+    String Destination;
 
     public addRequest(){
 
@@ -56,7 +55,7 @@ public class addRequest {
         this.driver_number = driver_number;
     }
 
-    public addRequest(String request_id, String user_id, String offline_BroadcastStatus, String request_Status, String user_noP, String timeStamp, String location, String requestCode, double lat, double lon) {
+    public addRequest(String request_id, String user_id, String offline_BroadcastStatus, String request_Status, String user_noP, String timeStamp, String location, String requestCode, double lat, double lon, String UserDestination) {
         this.request_id = request_id;
         this.user_id = user_id;
         this.offline_BroadcastStatus = offline_BroadcastStatus;
@@ -65,15 +64,15 @@ public class addRequest {
         this.timeStamp = timeStamp;
         this.location = location;
         this.requestCode = requestCode;
-        this.safety_Code = safety_Code;
-        this.driver_number = driver_number;
         this.lat = lat;
         this.lon = lon;
+        this.Destination = UserDestination;
     }
 
-    public addRequest(double dist, String streetname) {
-        this.dist = dist;
-        this.streetname = streetname;
+    public addRequest(String user_id, double lat, double lon) {
+        this.user_id = user_id;
+        this.lat = lat;
+        this.lon = lon;
     }
 
     public String getRequest_id() {
@@ -124,11 +123,7 @@ public class addRequest {
         return lon;
     }
 
-    public double getDist() {
-        return dist;
-    }
-
-    public String getStreetname() {
-        return streetname;
+    public String getDestination() {
+        return Destination;
     }
 }

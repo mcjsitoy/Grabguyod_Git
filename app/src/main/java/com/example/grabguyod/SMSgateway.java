@@ -64,13 +64,10 @@ public class SMSgateway extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_smsgateway);
 
-        button = (Button) findViewById(R.id.bt_request);
         bt_on = (Button) findViewById(R.id.button_On);
         bt_off = (Button) findViewById(R.id.button_off);
         bt_back = (Button) findViewById(R.id.button_back);
         tv_Count = (TextView) findViewById(R.id.textView_Count);
-        editText = (EditText) findViewById(R.id.tb_id);
-        editText2 =(EditText) findViewById(R.id.tb_noP);
 
 
         bt_on.setOnClickListener(new View.OnClickListener() {
