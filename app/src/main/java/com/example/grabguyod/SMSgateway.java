@@ -42,19 +42,15 @@ public class SMSgateway extends AppCompatActivity {
     final List<String> timestampReqeustList = new ArrayList<String>();
     final List<String> phoneNumberList = new ArrayList<String>();
     final List<String> safetycodeList = new ArrayList<String>();
-    final List<String> getRequestCodeList = new ArrayList<String>();
+    final List<String> userDestination = new ArrayList<String>();
     public final List<String> phoneNumber = new ArrayList<String>();
-    private String tempSafetyCode, tempNumber, tempNumber2, templocation, tempNoPassenger, tempRequestCode, tempTimeStamp, temprequestCode;
+    private String tempSafetyCode, tempNumber, tempNumber2, templocation, tempNoPassenger, tempRequestCode, tempTimeStamp, temprequestCode, temp_userDestination;
     SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss yyyy-MM-dd");
-    String millisInString  = dateFormat.format(new Date());
     public int sizePhone;
     Button button, bt_on, bt_off, bt_back;
-    EditText editText, editText2;
     TextView tv_Count;
     boolean isActive = false;
-    int count = 0, size = 0, loopcount = 0;
-    String number = "09228203042";
-    String sms = "99 test";
+    int count = 0, size = 0;
 
 
 
@@ -68,13 +64,14 @@ public class SMSgateway extends AppCompatActivity {
         bt_off = (Button) findViewById(R.id.button_off);
         bt_back = (Button) findViewById(R.id.button_back);
         tv_Count = (TextView) findViewById(R.id.textView_Count);
-
-
+        databaseReference = FirebaseDatabase.getInstance().getReference("users");
+        GetPhoneNumbers();
         bt_on.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 isActive = true;
                 Toast.makeText(SMSgateway.this, "Gateway is On", Toast.LENGTH_SHORT).show();
+                BroadcastOn();
                 counter();
             }
         });
@@ -82,6 +79,7 @@ public class SMSgateway extends AppCompatActivity {
         bt_off.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                BroadcastOff();
                 isActive = false;
             }
         });
@@ -182,7 +180,6 @@ public class SMSgateway extends AppCompatActivity {
 
     private  void broadcastSMS(){
 
-        databaseReference = FirebaseDatabase.getInstance().getReference("users");
         queryRequest =  FirebaseDatabase.getInstance().getReference("requestForm");
 
 
@@ -194,6 +191,7 @@ public class SMSgateway extends AppCompatActivity {
                 childlist.clear();
                 noPassengerList.clear();
                 requestCodeList.clear();
+                userDestination.clear();
                 for (DataSnapshot areaSnapshot : dataSnapshot.getChildren()) {
                     String keyName = areaSnapshot.getKey();
                     keyNamelist.add(keyName);
@@ -205,6 +203,8 @@ public class SMSgateway extends AppCompatActivity {
                     requestCodeList.add(tempRequestCode);
                     tempTimeStamp = areaSnapshot.child("timeStamp").getValue(String.class);
                     timestampReqeustList.add(tempTimeStamp);
+                    temp_userDestination = areaSnapshot.child("destination").getValue(String.class);
+                    userDestination.add(temp_userDestination);
                     size = keyNamelist.size();
                 }
             }
@@ -231,7 +231,7 @@ public class SMSgateway extends AppCompatActivity {
                     for (int y = 0; y < size; y++) {
                         try {
                             SmsManager smsManager = SmsManager.getDefault();
-                            smsManager.sendTextMessage(tempNumber, null, "Location: " + childlist.get(y) + " | Number of Riders: " + noPassengerList.get(y) + " | Request Code: " + requestCodeList.get(y) + " | Time of Request: " + timestampReqeustList.get(y), null, null);
+                            smsManager.sendTextMessage(tempNumber, null, "Rider Location: " + childlist.get(y) + " | User Destination:" + userDestination.get(y)  + " | Number of Riders: " + noPassengerList.get(y) + " | Request Code: " + requestCodeList.get(y) + " | Time of Request: " + timestampReqeustList.get(y) , null, null);
                             queryRequest.child(keyNamelist.get(y)).child("offline_BroadcastStatus").setValue("Broadcast A");
                             Toast.makeText(SMSgateway.this, "Sent", Toast.LENGTH_SHORT).show();
 
@@ -262,6 +262,7 @@ public class SMSgateway extends AppCompatActivity {
                 childlist.clear();
                 safetycodeList.clear();
                 phoneNumberList.clear();
+                userDestination.clear();
                 for (DataSnapshot areaSnapshot : dataSnapshot.getChildren()) {
                     String keyName = areaSnapshot.getKey();
                     keyNamelist.add(keyName);
@@ -271,6 +272,8 @@ public class SMSgateway extends AppCompatActivity {
                     safetycodeList.add(tempSafetyCode);
                     tempNumber2 = areaSnapshot.child("driver_number").getValue(String.class);
                     phoneNumberList.add(tempNumber2);
+                    temp_userDestination = areaSnapshot.child("destination").getValue(String.class);
+                    userDestination.add(temp_userDestination);
                     size = keyNamelist.size();
                 }
             }
@@ -284,7 +287,7 @@ public class SMSgateway extends AppCompatActivity {
         for (int y = 0; y < size; y++) {
             try {
                 SmsManager smsManager = SmsManager.getDefault();
-                smsManager.sendTextMessage(phoneNumberList.get(y), null,  "Passenger Code: " + safetycodeList.get(y), null, null);
+                smsManager.sendTextMessage(phoneNumberList.get(y), null,  "Passenger Code: " + safetycodeList.get(y) + " Passenger Location: " + childlist.get(y) + " Passenger Location:" + userDestination.get(y), null, null);
                 queryRequest.child(keyNamelist.get(y)).child("request_Status").setValue("Accepted Code Sent");
                 Toast.makeText(SMSgateway.this, "Sent", Toast.LENGTH_SHORT).show();
 
@@ -345,15 +348,86 @@ public class SMSgateway extends AppCompatActivity {
 
 
 
-    /*//Message Sending Function
-    public void sendText(){
-        try{
-            SmsManager smsManager = SmsManager.getDefault();
-            smsManager.sendTextMessage(number, null,sms, null, null);
-            Toast.makeText(SMSgateway.this, "Sent" + tempNumber, Toast.LENGTH_SHORT).show();
+    //Notification For the SMS Gateway is turned On
+    public void BroadcastOn(){
 
-        } catch (Exception e) {
-            Toast.makeText(SMSgateway.this, "Failed", Toast.LENGTH_SHORT).show();
-        }
-    }*/
+        databaseReference.child("offlineDrivers").addListenerForSingleValueEvent(new ValueEventListener() {
+            //Getting The Phone Number of Offline Drivers
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                phoneNumber.clear();
+                for (DataSnapshot areaSnapshot : dataSnapshot.getChildren()) {
+                    String areaName = areaSnapshot.child("tb_PhoneNumber").getValue(String.class);
+                    phoneNumber.add(areaName);
+                    sizePhone = phoneNumber.size();
+                }
+                for (String phone : phoneNumber) {
+                        try {
+                            SmsManager smsManager = SmsManager.getDefault();
+                            smsManager.sendTextMessage(phone, null,"SMS Gateway is now switched on. You may communicate with the system." , null, null);
+                            Toast.makeText(SMSgateway.this, "Sent", Toast.LENGTH_SHORT).show();
+                        } catch (Exception e) {
+
+                        }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    //Notification For the SMS Gateway is turned On
+    public void BroadcastOff(){
+
+        databaseReference.child("offlineDrivers").addListenerForSingleValueEvent(new ValueEventListener() {
+            //Getting The Phone Number of Offline Drivers
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                phoneNumber.clear();
+                for (DataSnapshot areaSnapshot : dataSnapshot.getChildren()) {
+                    String areaName = areaSnapshot.child("tb_PhoneNumber").getValue(String.class);
+                    phoneNumber.add(areaName);
+                    sizePhone = phoneNumber.size();
+                }
+                for (String phone : phoneNumber) {
+                    try {
+                        SmsManager smsManager = SmsManager.getDefault();
+                        smsManager.sendTextMessage(phone, null,"SMS Gateway is now switched off. You can no longer communicate with system." , null, null);
+                        Toast.makeText(SMSgateway.this, "Sent", Toast.LENGTH_SHORT).show();
+                    } catch (Exception e) {
+
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    public void GetPhoneNumbers(){
+
+        databaseReference.child("offlineDrivers").addListenerForSingleValueEvent(new ValueEventListener() {
+            //Getting The Phone Number of Offline Drivers
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                phoneNumber.clear();
+                for (DataSnapshot areaSnapshot : dataSnapshot.getChildren()) {
+                    String areaName = areaSnapshot.child("tb_PhoneNumber").getValue(String.class);
+                    phoneNumber.add(areaName);
+                    sizePhone = phoneNumber.size();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
 }

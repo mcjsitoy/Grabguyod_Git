@@ -52,13 +52,14 @@ public class list_layout extends ArrayAdapter<addRequest> {
 
         TextView textViewId = (TextView) listViewItem.findViewById(R.id.textView2);
         TextView textViewPhone = (TextView) listViewItem.findViewById(R.id.textView_location);
-        TextView tv_broadcast = (TextView) listViewItem.findViewById(R.id.textView_noRiders);
-        TextView tv_status = (TextView) listViewItem.findViewById(R.id.textView4);
+        TextView tv_broadcast = (TextView) listViewItem.findViewById(R.id.textView_saferyCode);
+        TextView tv_status = (TextView) listViewItem.findViewById(R.id.textView_Status);
         TextView tv_timestamp = (TextView) listViewItem.findViewById(R.id.textView_Timestamp);
         TextView tv_Location = listViewItem.findViewById(R.id.textView_location);
         TextView tv_NoRiders = listViewItem.findViewById(R.id.textView_noRiders);
         Button bt_add = listViewItem.findViewById(R.id.button_picked);
         Button bt_map = listViewItem.findViewById(R.id.button_map);
+        bt_map.setEnabled(false);
 
 
         final addRequest addRequest = addRequestList.get(position);
@@ -74,11 +75,25 @@ public class list_layout extends ArrayAdapter<addRequest> {
         lng = addRequest.getLon();
 
 
+        if (status_request.equals("Accepted")){
+            bt_map.setEnabled(true);
+            bt_add.setEnabled(false);
+        } else if (status_request.equals("Waiting Confirmation")) {
+            bt_map.setEnabled(false);
+            bt_add.setEnabled(false);
+        } else if (status_request.equals("Waiting Confirmation") || status_request.equals("Accepted Code Sent"))  {
+            bt_map.setEnabled(true);
+            bt_add.setEnabled(false);
+        }
+
+
 /*
         textViewId.setText(addRequest.getUser_id());*/
         tv_timestamp.setText(addRequest.getTimeStamp());
         tv_Location.setText(addRequest.getLocation());
         tv_NoRiders.setText(addRequest.getUser_noP());
+        tv_status.setText(addRequest.getRequest_Status());
+        tv_broadcast.setText(addRequest.getSafety_Code());// Safety code
 
 
 
@@ -94,11 +109,7 @@ public class list_layout extends ArrayAdapter<addRequest> {
         bt_map.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                translat = lat;
-                translng = lng;
-
-                /*addRequest adR = new addRequest(id_user, lat,lng);
-                drivloc.child(id_request).setValue(adR);*/
+                querythis.child(id_request).removeValue();
             }
         });
 

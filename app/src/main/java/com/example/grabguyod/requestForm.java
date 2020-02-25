@@ -57,6 +57,9 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.mapboxsdk.style.layers.FillLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 
@@ -72,18 +75,18 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillOpacity;
 
 public class requestForm extends AppCompatActivity implements OnMapReadyCallback, PermissionsListener {
 
-    DatabaseReference database_requestForm, queryRequest, databaseReference, driverCount, ss;
+    DatabaseReference database_requestForm, queryRequest, databaseReference, driverCount, ss,destroy;
     ListView listViewRequest;
     List<addRequest> addRequestList;
     FirebaseUser user;
     String offline_BroadcastStatus = "Pending",request_Status = "Pending", uid, req_id;
     SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss yyyy-MM-dd");
     String millisInString  = dateFormat.format(new Date());
-    String location = "Davao",tempCount; // LOCATION PLACE HERE
-    String no_Riders, requestCode, status, safetycode, tempPhoneNumber,tempName, lat, lng, set,user_destination;
+    String location,tempCount; // LOCATION PLACE HERE
+    String no_Riders, requestCode, status, safetycode, temp_driver,tempName, lat, ln,user_destination, temp_GuyodPlate;
     Random random = new Random();
-    EditText  et_noP, et_destination;
-    TextView tv_safeCode,tv_userName,tv_driverCount, tv_requestStatus;
+    EditText  et_noP;
+    TextView tv_safeCode,tv_userName,tv_driverCount, tv_requestStatus, et_destination;
     Button bt_submit, bt_logout, bt_cancel,bt_accept,bt_decline;
     double lt, lg;
     View lt_cancel, lt_driverfound, lt_currentdriver;
@@ -94,6 +97,7 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
     final List<Double> lnglist = new ArrayList<Double>();
     Boolean hasRequest = false;
     int size, count;
+    private static final String DOT = "dot-10";
 
     private static final LatLng BOUND_CORNER_NW = new LatLng(7.165823, 125.646832);
     private static final LatLng BOUND_CORNER_SE = new LatLng(7.161096, 125.657170);
@@ -119,6 +123,14 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
     Double counterDist;
     String nearLoc;
     int counterPosition;
+    Symbol symbol;
+    SymbolManager symbolManager;
+    Double destlat;
+    Double destlng;
+    Double counterDestination;
+    String TempAddress;
+    int DestcounterPosition;
+    final List<Double> Destination_distlist = new ArrayList<Double>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -130,6 +142,7 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
         mauth = FirebaseAuth.getInstance();
 
         database_requestForm = FirebaseDatabase.getInstance().getReference("requestForm");
+
 
         //Setting The Widgets
         bt_cancel = (Button) findViewById(R.id.button_cancel);
@@ -143,7 +156,7 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
         lt_driverfound = findViewById(R.id.layout_driverFound);
         lt_currentdriver = findViewById(R.id.layout_currentdriver);
         tv_safeCode = findViewById(R.id.textView_passengerCode);
-        et_destination = findViewById(R.id.editText_Destination);
+        et_destination = findViewById(R.id.TextView_set_dest);
         tv_requestStatus = findViewById(R.id.textView25);
         /*s_dest = findViewById(R.id.spinner2);*/
 
@@ -227,6 +240,10 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
             @Override
             public   void onClick(View v) {
                 disconnect();
+                Intent intent = new Intent(requestForm.this, rider_landingpage.class);
+                startActivity(intent);
+                finish();
+                return;
             }
         });
 
@@ -270,6 +287,7 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
                         //MARKER ADD//
                         showCrosshair();
                         initLocationEngine();
+                        getdest(style);
 
                     }
 
@@ -579,7 +597,6 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
     private void addRequest(){
 
         no_Riders = et_noP.getText().toString().trim();
-        user_destination = et_destination.getText().toString().trim();
         requestCode = String.format("%04d", random.nextInt(10000));
 
         if(!TextUtils.isEmpty(no_Riders)){
@@ -605,6 +622,8 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
         et_noP.setText("");
         lt_cancel.setVisibility(View.INVISIBLE);
         hasRequest = true;
+        database_requestForm.child(req_id).removeValue();
+
     }
 
 
@@ -619,7 +638,7 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (dataSnapshot.hasChildren()) {
                         status = dataSnapshot.child(req_id).child("request_Status").getValue(String.class);
-                        tempPhoneNumber = dataSnapshot.child(req_id).child("driver_number").getValue(String.class);
+                        temp_driver = dataSnapshot.child(req_id).child("driver_number").getValue(String.class);
                         goopen();
                     }
                 }
@@ -633,10 +652,10 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
     }
 
     private void acceptDriver(){
-
+        driverCount = FirebaseDatabase.getInstance().getReference("requestForm");
         safetycode = String.format("%04d", random.nextInt(10000));
-        addRequest add_req = new addRequest(req_id, uid, "Accepted", "Accepted", no_Riders,millisInString, nearLoc, requestCode, tempPhoneNumber,  safetycode);
-        database_requestForm.child(req_id).setValue(add_req);
+        addRequest add_req = new addRequest(req_id, uid, "Accepted", "Accepted", no_Riders,millisInString, nearLoc, requestCode, safetycode, temp_driver ,lt ,lg,user_destination);
+        driverCount.child(req_id).setValue(add_req);
         Toast.makeText(requestForm.this, "Driver Accepted", Toast.LENGTH_SHORT).show();
         lt_driverfound.setVisibility(View.INVISIBLE);
         lt_cancel.setVisibility(View.INVISIBLE);
@@ -646,7 +665,7 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
     }
 
     private void declineDriver(){
-        addRequest add_req = new addRequest(req_id, uid, no_Riders, "Pending","Pending",millisInString, nearLoc, requestCode);
+        addRequest add_req = new addRequest(req_id, uid, "Pending", "Pending", no_Riders,millisInString, nearLoc, requestCode, safetycode, temp_driver ,lt ,lg,user_destination);
         database_requestForm.child(req_id).setValue(add_req);
         Toast.makeText(requestForm.this, "Driver Declined", Toast.LENGTH_SHORT).show();
         lt_driverfound.setVisibility(View.INVISIBLE);
@@ -665,7 +684,7 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
     private void showPassengerCode(){
         databaseReference = FirebaseDatabase.getInstance().getReference("requestForm");
 
-        databaseReference.addValueEventListener(new ValueEventListener() {
+        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String safeCode = dataSnapshot.child(req_id).child("safety_Code").getValue(String.class);
@@ -709,8 +728,90 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
             }
 
         });
+
+
     }
 
+
+    private void getdest(@NonNull final Style style){
+
+        mapbox.addOnMapClickListener(new MapboxMap.OnMapClickListener() {
+            SymbolManager symbolManager = new SymbolManager(mapView, mapbox, style);
+            @Override
+            public boolean onMapClick(@NonNull LatLng point) {
+                destlat = point.getLatitude();
+                destlng = point.getLongitude();
+
+                if(symbol != null) {
+                    symbolManager.delete(symbol);
+                }
+
+                symbol = symbolManager.create(new SymbolOptions()
+                        .withLatLng(new LatLng(point))
+                        .withIconImage(DOT)
+                        .withIconSize(2.0f));
+
+                getDestinationAddress();
+                return true;
+
+
+
+
+
+
+
+
+            }
+        });
+    }
+
+
+    private void getDestinationAddress() {
+        Destination_distlist.clear();
+        for (int y = 0; y < count; y++) {
+
+            double earthRadius = 6371; // in miles, change to 6371 for kilometer output
+
+            double dLat = Math.toRadians(latlist.get(y) - destlat);
+            double dLng = Math.toRadians(lnglist.get(y) - destlng);
+
+            double sindLat = Math.sin(dLat / 2);
+            double sindLng = Math.sin(dLng / 2);
+
+            double a = Math.pow(sindLat, 2) + Math.pow(sindLng, 2)
+                    * Math.cos(Math.toRadians(lt)) * Math.cos(Math.toRadians(latlist.get(y)));
+
+            double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+            double dist = earthRadius * c;
+
+            Destination_distlist.add(dist);
+        }
+
+
+        for (int x = 0; x < Destination_distlist.size(); x++) {
+            if (x == 0) {
+                counterDestination = Destination_distlist.get(x);
+
+                //TEMP//
+                TempAddress = streetlist.get(x);
+                DestcounterPosition = x;
+
+            } else {
+                if (counterDestination > Destination_distlist.get(x)) {
+                    counterDestination = Destination_distlist.get(x);
+                    TempAddress = streetlist.get(x);
+                    DestcounterPosition = x;
+                }
+            }
+
+        }
+        Toast.makeText(requestForm.this, "Destination:" + TempAddress, Toast.LENGTH_SHORT).show();
+        et_destination.setText(TempAddress);
+        user_destination = TempAddress;
+
+
+    }
 
 }
 

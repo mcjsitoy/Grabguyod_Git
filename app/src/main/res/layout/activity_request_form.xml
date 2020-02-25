@@ -68,13 +68,12 @@
                     android:layout_weight="1"
                     android:text="Destination" />
 
-                <EditText
-                    android:id="@+id/editText_Destination"
+                <TextView
+                    android:id="@+id/TextView_set_dest"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:ems="10"
-                    android:hint="Destination here"
                     android:inputType="textPersonName" />
 
             </LinearLayout>

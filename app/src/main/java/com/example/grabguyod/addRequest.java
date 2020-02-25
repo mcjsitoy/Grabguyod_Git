@@ -55,6 +55,22 @@ public class addRequest {
         this.driver_number = driver_number;
     }
 
+    public addRequest(String request_id, String user_id, String offline_BroadcastStatus, String request_Status, String user_noP, String timeStamp, String location, String requestCode, String safety_Code, String driver_number, double lat, double lon, String destination) {
+        this.request_id = request_id;
+        this.user_id = user_id;
+        this.offline_BroadcastStatus = offline_BroadcastStatus;
+        this.request_Status = request_Status;
+        this.user_noP = user_noP;
+        this.timeStamp = timeStamp;
+        this.location = location;
+        this.requestCode = requestCode;
+        this.safety_Code = safety_Code;
+        this.driver_number = driver_number;
+        this.lat = lat;
+        this.lon = lon;
+        Destination = destination;
+    }
+
     public addRequest(String request_id, String user_id, String offline_BroadcastStatus, String request_Status, String user_noP, String timeStamp, String location, String requestCode, double lat, double lon, String UserDestination) {
         this.request_id = request_id;
         this.user_id = user_id;

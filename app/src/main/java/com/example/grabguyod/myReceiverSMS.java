@@ -63,7 +63,7 @@ public class myReceiverSMS extends BroadcastReceiver {
                 checkSMS();
 
 
-                Toast.makeText(context, "ID: " + driver_id + "\nNumber: " + count, Toast.LENGTH_LONG).show();
+                Toast.makeText(context, "ID: " + Codechecker, Toast.LENGTH_LONG).show();
 
                 if (Codechecker.equals(systemCode))  {
                     database_smsToDatabase = FirebaseDatabase.getInstance().getReference("table_SMS_LOG");
@@ -123,8 +123,6 @@ public class myReceiverSMS extends BroadcastReceiver {
 
     //Checks if message is part of the SYSTEM
     public void checkSMS() {
-        Codechecker = "";
-        requestCode = "";
         TempPhone = "0";
         char[] ch = new char[msg.length()];
         char[] ph = new char[phoneNo.length()];
@@ -135,11 +133,10 @@ public class myReceiverSMS extends BroadcastReceiver {
         for (int i = 0; i < 3; i++) {
             Codechecker += ch[i];
         }
-        if (msg.length() == 4) {
-            for (int i = 4; i < 8; i++) {
+        for (int i = 4; i < 8; i++) {
                 requestCode += ch[i];
-            }
         }
+
         for (int i = 0; i < phoneNo.length(); i++) {
             ph[i] = phoneNo.charAt(i);
         }

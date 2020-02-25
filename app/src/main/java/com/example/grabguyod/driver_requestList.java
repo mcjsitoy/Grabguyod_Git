@@ -413,13 +413,15 @@ public class driver_requestList extends AppCompatActivity implements OnMapReadyC
 
                         lat = latlist.get(z);
                         lng = lnglist.get(z);
-                        SymbolManager symbolManager = new SymbolManager(mapView, mapbox, style);
-                        symbols = symbolManager.create(new SymbolOptions()
-                                .withLatLng(new LatLng(lat, lng))
-                                .withIconImage(DOT)
-                                .withIconColor("red")
-                                .withIconSize(2.0f)
-                                .withDraggable(true));
+                        if (lat != null && lng != null ) {
+                            SymbolManager symbolManager = new SymbolManager(mapView, mapbox, style);
+                            symbols = symbolManager.create(new SymbolOptions()
+                                    .withLatLng(new LatLng(lat, lng))
+                                    .withIconImage(DOT)
+                                    .withIconColor("red")
+                                    .withIconSize(2.0f)
+                                    .withDraggable(true));
+                        }
                     }
                 }
             }

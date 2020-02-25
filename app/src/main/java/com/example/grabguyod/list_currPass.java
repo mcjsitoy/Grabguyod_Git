@@ -20,18 +20,17 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.List;
 
-public class list_currPass extends  ArrayAdapter<addRequest> {
+public class list_currPass extends  ArrayAdapter<addCurrentRequest> {
 
     private Activity context;
-    private List<addRequest> addRequestList;
+    public List<addCurrentRequest> addCurrentRequestList;
     private String keyName, id_request,id_user,noP_user,offlineBroadcastStatus,status_request, timestamp,user_location, requestCode, uid;
     FirebaseUser user;
     DatabaseReference querythis;
 
-    public list_currPass(Activity context, List<addRequest> addRequestList){
-        super(context, R.layout.activity_list_layout, addRequestList);
+    public list_currPass(Activity context, List<addCurrentRequest> addCurrentRequestList){
+        super(context, R.layout.activity_list_curr_pass, addCurrentRequestList);
         this.context = context;
-        this.addRequestList = addRequestList;
         user = FirebaseAuth.getInstance().getCurrentUser();
         uid = user.getUid();
 
@@ -40,37 +39,23 @@ public class list_currPass extends  ArrayAdapter<addRequest> {
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        querythis = FirebaseDatabase.getInstance().getReference("requestForm");
         LayoutInflater inflater = context.getLayoutInflater();
 
-        View listViewItem = inflater.inflate(R.layout.activity_list_layout,null,true);
+        View listViewItem = inflater.inflate(R.layout.activity_list_curr_pass,null,true);
 
-        TextView textViewId = (TextView) listViewItem.findViewById(R.id.textView2);
-        TextView textViewPhone = (TextView) listViewItem.findViewById(R.id.textView_location);
-        TextView tv_broadcast = (TextView) listViewItem.findViewById(R.id.textView_noRiders);
-        TextView tv_status = (TextView) listViewItem.findViewById(R.id.textView4);
-        TextView tv_timestamp = (TextView) listViewItem.findViewById(R.id.textView_Timestamp);
-        TextView tv_Location = listViewItem.findViewById(R.id.textView_location);
-        TextView tv_NoRiders = listViewItem.findViewById(R.id.textView_noRiders);
+        TextView tv_status = listViewItem.findViewById(R.id.textView_StatusData);
+        TextView tv_location = listViewItem.findViewById(R.id.textView_Location);
+        TextView tv_destination = listViewItem.findViewById(R.id.textView_Destination);
+        TextView tv_safetycode = listViewItem.findViewById(R.id.textView_SecurityCode);
         Button bt_add = listViewItem.findViewById(R.id.button_picked);
+        final addCurrentRequest acr = addCurrentRequestList.get(position);
 
 
-        final addRequest addRequest = addRequestList.get(position);
-        id_request = addRequest.getRequest_id();
-        id_user = addRequest.getUser_id();
-        noP_user = addRequest.getUser_noP();
-        offlineBroadcastStatus = addRequest.getOffline_BroadcastStatus();
-        user_location = addRequest.getLocation();
-        timestamp = addRequest.getTimeStamp();
-        status_request = addRequest.getRequest_Status();
-        requestCode = addRequest.getRequestCode();
 
-
-/*
-        textViewId.setText(addRequest.getUser_id());*/
-        tv_timestamp.setText(addRequest.getTimeStamp());
-        tv_Location.setText(addRequest.getLocation());
-        tv_NoRiders.setText(addRequest.getUser_noP());
+        tv_status.setText(acr.getRequest_Status());
+        tv_location.setText(acr.getLocation());
+        tv_destination.setText(acr.getDestination());
+        tv_safetycode.setText(acr.getSafety_Code());
 
 
 
@@ -78,15 +63,17 @@ public class list_currPass extends  ArrayAdapter<addRequest> {
         bt_add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addRequest add_req = new addRequest(id_request, id_user, offlineBroadcastStatus, "Waiting Confirmation",noP_user, timestamp,user_location, requestCode, uid);
-                querythis.child(id_request).setValue(add_req);
+                querythis = FirebaseDatabase.getInstance().getReference("requestForm").child(id_request);
+                querythis.removeValue();
             }
         });
 
-
-
-
         return listViewItem;
+
+
     }
+
+
+
 
 }
