@@ -145,7 +145,7 @@ public class driver_requestList extends AppCompatActivity implements OnMapReadyC
     public void onMapReady(@NonNull final MapboxMap mapbox) {
         this.mapbox = mapbox;
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        mapbox.setStyle(new Style.Builder().fromUri("mapbox://styles/mcjsitoy/ck08cyj3p125l1cp6x5dj7veq"),
+        mapbox.setStyle(new Style.Builder().fromUri("mapbox://styles/mcjsitoy/ck751ro940bjw1io9o3bcc9mz"),
                 new Style.OnStyleLoaded() {
                     @Override
                     public void onStyleLoaded(@NonNull Style style) {
@@ -398,7 +398,7 @@ public class driver_requestList extends AppCompatActivity implements OnMapReadyC
 
     private void getrider(final Style style){
         DatabaseReference drivloc = FirebaseDatabase.getInstance().getReference("requestForm");
-        drivloc.addValueEventListener(new ValueEventListener() {
+        drivloc.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 dataSnapshot.getChildrenCount();
@@ -428,6 +428,8 @@ public class driver_requestList extends AppCompatActivity implements OnMapReadyC
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
+
+
 
             }
         });

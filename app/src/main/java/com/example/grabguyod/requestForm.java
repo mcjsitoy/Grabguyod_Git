@@ -270,7 +270,7 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
         this.mapbox = mapbox;
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-        mapbox.setStyle(new Style.Builder().fromUri("mapbox://styles/mcjsitoy/ck08cyj3p125l1cp6x5dj7veq"),
+        mapbox.setStyle(new Style.Builder().fromUri("mapbox://styles/mcjsitoy/ck751ro940bjw1io9o3bcc9mz"),
                 new Style.OnStyleLoaded() {
                     @Override
                     public void onStyleLoaded(@NonNull Style style) {
@@ -566,10 +566,20 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
         GeoFire geoFire = new GeoFire(ref);
         geoFire.removeLocation(userId);
     }
+    private void disconnectreq(){
+
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("CustomerRequest");
+
+        GeoFire geoFire = new GeoFire(ref);
+        geoFire.removeLocation(userId);
+    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        disconnect();
+
     }
 
 
@@ -599,7 +609,7 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
         no_Riders = et_noP.getText().toString().trim();
         requestCode = String.format("%04d", random.nextInt(10000));
 
-        if(!TextUtils.isEmpty(no_Riders)){
+        if(!TextUtils.isEmpty(no_Riders) && et_destination.getText() != "Click Map"){
 
             req_id = database_requestForm.push().getKey();
             addRequest add_req = new addRequest(req_id, uid, offline_BroadcastStatus, request_Status,no_Riders,millisInString, nearLoc, requestCode, lt, lg,user_destination);
@@ -610,7 +620,7 @@ public class requestForm extends AppCompatActivity implements OnMapReadyCallback
             hasRequest = true;
             getdriver();
         } else {
-            Toast.makeText(this, "Enter Details", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Enter Details & Select Destination on Map", Toast.LENGTH_SHORT).show();
         }
     }
 

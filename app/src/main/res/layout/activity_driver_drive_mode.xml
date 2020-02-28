@@ -55,7 +55,7 @@
                     android:text="+" />
 
                 <TextView
-                    android:id="@+id/textView11"
+                    android:id="@+id/textView_passCount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -89,13 +89,6 @@
                 android:layout_weight="1"
                 android:text="View Request" />
 
-            <Button
-                android:id="@+id/button_viewMap"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="25dp"
-                android:layout_weight="1"
-                android:text="View Map" />
         </LinearLayout>
 
         <ListView

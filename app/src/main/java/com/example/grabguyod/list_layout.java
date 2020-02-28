@@ -26,7 +26,7 @@ public class list_layout extends ArrayAdapter<addRequest> {
 
     private Activity context;
     private List<addRequest> addRequestList;
-    private String keyName, id_request,id_user,noP_user,offlineBroadcastStatus,status_request, timestamp,user_location, requestCode, uid;
+    private String keyName, id_request,id_user,noP_user,offlineBroadcastStatus,status_request, timestamp,user_location, requestCode, uid, user_destination;
     private Double lat, lng;
     public static Double translat ,translng;
     FirebaseUser user;
@@ -51,11 +51,10 @@ public class list_layout extends ArrayAdapter<addRequest> {
         View listViewItem = inflater.inflate(R.layout.activity_list_layout,null,true);
 
         TextView textViewId = (TextView) listViewItem.findViewById(R.id.textView2);
-        TextView textViewPhone = (TextView) listViewItem.findViewById(R.id.textView_location);
         TextView tv_broadcast = (TextView) listViewItem.findViewById(R.id.textView_saferyCode);
         TextView tv_status = (TextView) listViewItem.findViewById(R.id.textView_Status);
         TextView tv_timestamp = (TextView) listViewItem.findViewById(R.id.textView_Timestamp);
-        TextView tv_Location = listViewItem.findViewById(R.id.textView_location);
+        TextView textView_location = listViewItem.findViewById(R.id.textView_location);
         TextView tv_NoRiders = listViewItem.findViewById(R.id.textView_noRiders);
         Button bt_add = listViewItem.findViewById(R.id.button_picked);
         Button bt_map = listViewItem.findViewById(R.id.button_map);
@@ -71,6 +70,10 @@ public class list_layout extends ArrayAdapter<addRequest> {
         timestamp = addRequest.getTimeStamp();
         status_request = addRequest.getRequest_Status();
         requestCode = addRequest.getRequestCode();
+        user_destination = addRequest.getDestination();
+
+
+
         lat = addRequest.getLat();
         lng = addRequest.getLon();
 
@@ -89,8 +92,8 @@ public class list_layout extends ArrayAdapter<addRequest> {
 
 /*
         textViewId.setText(addRequest.getUser_id());*/
-        tv_timestamp.setText(addRequest.getTimeStamp());
-        tv_Location.setText(addRequest.getLocation());
+        textView_location.setText(addRequest.getDestination());
+        tv_timestamp.setText(addRequest.getLocation());
         tv_NoRiders.setText(addRequest.getUser_noP());
         tv_status.setText(addRequest.getRequest_Status());
         tv_broadcast.setText(addRequest.getSafety_Code());// Safety code

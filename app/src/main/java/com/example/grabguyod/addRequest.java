@@ -13,7 +13,7 @@ public class addRequest {
     String driver_number;
     double lat;
     double lon;
-    String Destination;
+    String destination;
 
     public addRequest(){
 
@@ -68,7 +68,7 @@ public class addRequest {
         this.driver_number = driver_number;
         this.lat = lat;
         this.lon = lon;
-        Destination = destination;
+        this.destination = destination;
     }
 
     public addRequest(String request_id, String user_id, String offline_BroadcastStatus, String request_Status, String user_noP, String timeStamp, String location, String requestCode, double lat, double lon, String UserDestination) {
@@ -82,7 +82,7 @@ public class addRequest {
         this.requestCode = requestCode;
         this.lat = lat;
         this.lon = lon;
-        this.Destination = UserDestination;
+        this.destination = UserDestination;
     }
 
     public addRequest(String user_id, double lat, double lon) {
@@ -140,6 +140,6 @@ public class addRequest {
     }
 
     public String getDestination() {
-        return Destination;
+        return destination;
     }
 }

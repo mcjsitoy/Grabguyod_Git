@@ -18,11 +18,16 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class rider_landingpage extends AppCompatActivity {
 
     DatabaseReference driverCount;
-    String uid, tempName, tempCount;
+    String uid, tempName, tempCount, tempKey, tempStat;
     private Button bt_logout, bt_getDriver;
+    final List<String> keyNamelist = new ArrayList<String>();
+    final List<String> driverStat = new ArrayList<String>();
     private TextView tv_count, tv_name;
     FirebaseUser user;
     int size;

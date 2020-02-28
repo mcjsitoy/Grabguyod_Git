@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -25,12 +26,14 @@ import java.util.List;
 public class driver_driveMode extends AppCompatActivity {
 
     DatabaseReference database_requestForm,getRequest,setStreet;
-    Button bt_offDuty, bt_requestView, bt_mapView;
+    Button bt_offDuty, bt_requestView, bt_mapView, bt_add,bt_minus;
+    TextView tv_count;
     DatabaseReference updateDriverStat;
     ListView listViewRequest;
     List<addRequest>  addRequestList;
     FirebaseUser user;
     String uid, driverStat = "Off Duty";
+    int count = 0;
 
 
 
@@ -43,7 +46,9 @@ public class driver_driveMode extends AppCompatActivity {
         listViewRequest = (ListView) findViewById(R.id.listView_Request);
         bt_offDuty = findViewById(R.id.button_offDuty);
         bt_requestView = findViewById(R.id.button_viewRequest);
-        bt_mapView = findViewById(R.id.button_viewMap);
+        bt_add = findViewById(R.id.button_add);
+        bt_minus = findViewById(R.id.button_minus);
+        tv_count = findViewById(R.id.textView_passCount);
         user = FirebaseAuth.getInstance().getCurrentUser();
         uid = user.getUid();
         updateDriverStat = FirebaseDatabase.getInstance().getReference("table_AvailableDriver");
@@ -70,6 +75,28 @@ public class driver_driveMode extends AppCompatActivity {
                 return;
             }
         });
+
+        bt_add.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (count < 8){
+                    count++;
+                }
+                 tv_count.setText(String.valueOf(count));
+            }
+        });
+
+        bt_minus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (count > 0){
+                    count--;
+                }
+                tv_count.setText(String.valueOf(count));
+
+            }
+        });
+
 
 
 
